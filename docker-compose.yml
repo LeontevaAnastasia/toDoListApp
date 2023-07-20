@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  todolist-backend:
+    build: ../todolist-backend
+    restart: on-failure
+    container_name: todolist-backend
+
+    env_file: ./.env
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+      - rabbitmq
+      - todolist-scheduler
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker-compose
+
+  todolist-emailsender:
+    build: ../todolist-emailsender
+    restart: on-failure
+    container_name: todolist-emailsender
+    env_file: ./.env
+    depends_on:
+      - db
+      - rabbitmq
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker-compose
+      - SPRING_MAIL_PROTOCOL=${SPRING_MAIL_PROTOCOL}
+      - SPRING_MAIL_HOST=${SPRING_MAIL_HOST}
+      - SPRING_MAIL_PORT=${SPRING_MAIL_PORT}
+      - SPRING_MAIL_USERNAME=${SPRING_MAIL_USERNAME}
+      - SPRING_MAIL_PASSWORD=${SPRING_MAIL_PASSWORD}
+      - SENDER_ADDRESS=${SENDER_ADDRESS}
+
+  todolist-scheduler:
+    build: ../todolist-scheduler
+    restart: on-failure
+    container_name: todolist-scheduler
+    env_file: ./.env
+    depends_on:
+      - db
+      - rabbitmq
+      - todolist-emailsender
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker-compose
+
+  db:
+    image: postgres:13
+    container_name: db
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+    volumes:
+      - db_storage:/var/lib/postgresql/data
+
+
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:3-management
+    ports:
+      # The standard AMQP protocol port
+      - "5672:5672"
+      # HTTP management UI
+      - "15672:15672"
+    environment:
+      # The location of the RabbitMQ server.  amqp is the protocol;
+      # rabbitmq is the hostname.  Note that there is not a guarantee
+      # that the server will start first!  Telling the pika client library
+      # to try multiple times gets around this ordering issue.
+      AMQP_URL: "amqp://rabbitmq?connection_attempts=5&retry_delay=5"
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+volumes:
+  db_storage:
