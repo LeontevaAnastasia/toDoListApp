@@ -45,3 +45,34 @@ Spring Boot приложение с двумя модулями - Spring Schedul
 Задача сервиса - раз в сутки итерировать всех пользователей, формировать для них отчёты о задачах и изменениях в них за сутки, а также формировать email для отправки. 
 Сформированные сообщения отправляются в RabbitMQ очередь.
 https://github.com/LeontevaAnastasia/toDoListScheduler
+
+<h2> Инструкция по запуску проекта</h2>
+<li>Установить Docker //docs.docker.com/get-docker/</li>
+<li>Склонировать репозиторий</li>
+<h4>git clone https://github.com/LeontevaAnastasia/toDoListApp.git</h4>
+<li>В .env файл вставить свои данные для настройки отправки сообщений по протоколу SMTP. Можно использовать SMTP-сервис Яндекса https://yandex.ru/support/mail/mail-clients/others.html#smtpsetting</li>
+<br>
+
+Образец сконфигурированного .env файла<br>
+SPRING_MAIL_PROTOCOL=smtps<br>
+SPRING_MAIL_HOST=smtp.yandex.ru<br>
+SPRING_MAIL_PORT=465<br>
+SPRING_MAIL_USERNAME=username<br>
+SPRING_MAIL_PASSWORD=password<br>
+SENDER_ADDRESS=username@yandex.ru<br>
+
+<li>Запустить приложение</li>
+docker-compose -f docker-compose-deploy.yml up -d
+
+Для тестирования в бд добавлены юзеры:
+<li>C ролью USER <br>
+  -<b>login</b>: user@gmail.com<br>
+  -<b>pass</b>: password </li>
+<li> С ролью ADMIN <br>
+  -<b>login</b>: admin@gmail.com <br>
+  -<b>pass</b>: admin </li>
+<br>
+
+Приложение доступно по адресу: http://localhost:8080/login <br>
+Страница с документацией будет доступна по ссылке: http://localhost:8080/swagger-ui/index.html
+
